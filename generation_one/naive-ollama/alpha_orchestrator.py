@@ -528,7 +528,7 @@ class AlphaOrchestrator:
         try:
             # Run the alpha submitter as a subprocess
             result = subprocess.run([
-                sys.executable, 'successful_alpha_submitter.py',
+                sys.executable, 'improved_alpha_submitter.py',
                 '--batch-size', str(batch_size),
                 '--auto-mode'  # Run in automated mode
             ], capture_output=True, text=True, timeout=600)
