@@ -27,7 +27,9 @@ RUN ln -s /usr/bin/python3.8 /usr/bin/python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Install Ollama
+RUN apt-get update && apt-get install -y zstd
 RUN curl -fsSL https://ollama.ai/install.sh | sh
 
 # Copy application code
