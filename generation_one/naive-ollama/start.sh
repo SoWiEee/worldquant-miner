@@ -12,14 +12,14 @@ ollama serve > /app/logs/ollama.log 2>&1 &
 echo "Waiting for Ollama to start..."
 sleep 10
 
-# Pull DeepSeek-R1 model optimized for RTX A4000 (16GB VRAM)
-echo "Pulling DeepSeek-R1 model for RTX A4000..."
-if ollama pull deepseek-r1:8b; then
-    echo "Using deepseek-r1:8b model (RTX A4000 optimized - 5.2GB)"
+# Pull Qwen3.5 model optimized for RTX 4070 (12GB VRAM)
+echo "Pulling Qwen3.5:9b model for RTX 4070..."
+if ollama pull qwen3.5:9b; then
+    echo "Using qwen3.5:9b model (RTX 4070)"
+    MODEL_NAME="qwen3.5:9b"
+elif ollama pull deepseek-r1:8b; then
+    echo "Using deepseek-r1:8b model (fallback - 5.2GB)"
     MODEL_NAME="deepseek-r1:8b"
-elif ollama pull deepseek-r1:7b; then
-    echo "Using deepseek-r1:7b model (fallback - 4.7GB)"
-    MODEL_NAME="deepseek-r1:7b"
 elif ollama pull deepseek-r1:1.5b; then
     echo "Using deepseek-r1:1.5b model (fallback - 1.1GB)"
     MODEL_NAME="deepseek-r1:1.5b"
@@ -49,4 +49,6 @@ python improved_alpha_submitter.py --use-hopeful-file --min-hopeful-count 50 --i
 
 # Start the main application with Ollama integration (concurrent mode)
 echo "Starting alpha orchestrator with Ollama using $MODEL_NAME in concurrent mode..."
-python alpha_orchestrator.py --ollama-url http://localhost:11434 --ollama-model $MODEL_NAME --mode continuous --mining-interval 6 --batch-size 3 --max-concurrent 3
+python alpha_orchestrator.py --ollama-url http://localhost:11434 --ollama-model $MODEL_NAME --mode continuous --mining-interval 6 --batch-size 3 --max-concurrent 3 &
+
+exec "$@"
