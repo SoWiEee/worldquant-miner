@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   naive-ollma:
@@ -6,13 +6,13 @@ services:
     container_name: naive-ollma-gpu
     runtime: nvidia
     ports:
-      - "11434:11434"  # Ollama API port
+      - "11434:11434" # Ollama API port
     volumes:
-      - ./credential.txt:/app/credential.txt:ro  # Mount credentials
-      - ./results:/app/results  # Mount results directory
-      - ./logs:/app/logs  # Mount logs directory
-      - .:/app  # Mount current directory for hopeful_alphas.json sharing
-      - ollama_data:/root/.ollama  # Persist Ollama models
+      - ./credential.txt:/app/credential.txt:ro # Mount credentials
+      - ./results:/app/results # Mount results directory
+      - ./logs:/app/logs # Mount logs directory
+      - .:/app # Mount current directory for hopeful_alphas.json sharing
+      - ollama_data:/root/.ollama # Persist Ollama models
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
@@ -33,9 +33,19 @@ services:
               capabilities: [gpu]
         limits:
           memory: 12G
-          cpus: '4.0'
+          cpus: "4.0"
     restart: unless-stopped
-    command: ["python", "alpha_orchestrator.py", "--mode", "continuous", "--batch-size", "2", "--max-concurrent", "2"]
+    command:
+      [
+        "python",
+        "alpha_orchestrator.py",
+        "--mode",
+        "continuous",
+        "--batch-size",
+        "2",
+        "--max-concurrent",
+        "2",
+      ]
     networks:
       - naive-ollma-network
 
@@ -52,7 +62,7 @@ services:
     restart: unless-stopped
     networks:
       - naive-ollma-network
-      
+
   # Machine Miner Service
   machine-miner:
     build: .
@@ -77,9 +87,19 @@ services:
               capabilities: [gpu]
         limits:
           memory: 8G
-          cpus: '2.0'
+          cpus: "2.0"
     restart: unless-stopped
-    command: ["python", "machine_miner.py", "--credentials", "/app/credential.txt", "--region", "USA", "--universe", "TOP3000"]
+    command:
+      [
+        "python",
+        "machine_miner.py",
+        "--credentials",
+        "/app/credential.txt",
+        "--region",
+        "USA",
+        "--universe",
+        "TOP3000",
+      ]
     depends_on:
       - naive-ollma
     networks:
@@ -89,16 +109,19 @@ services:
   alpha-dashboard:
     build: .
     container_name: alpha-dashboard-gpu
+    runtime: nvidia
     ports:
       - "5000:5000"
     volumes:
       - ./results:/app/results
       - ./logs:/app/logs
       - ./credential.txt:/app/credential.txt:ro
-      - .:/app  # Mount current directory for hopeful_alphas.json sharing
+      - .:/app # Mount current directory for hopeful_alphas.json sharing
+      - ollama_data:/root/.ollama
     environment:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
     command: ["python", "web_dashboard.py"]
     depends_on:
       - naive-ollma
